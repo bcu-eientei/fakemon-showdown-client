@@ -1808,6 +1808,15 @@ p.or:after {
 .status.frz {
 	background: #009AA4;
 }
+.status.trr {
+	background: #411E72;
+}
+.status.wnd {
+	background: #7C6361;
+}
+.status.exh {
+	background: #BFA167;
+}
 
 .movebutton {
 	float: left;

@@ -120,6 +120,10 @@ export class BattleScene implements BattleSceneStub {
 		if (battle.id) {
 			numericId = parseInt(battle.id.slice(battle.id.lastIndexOf('-') + 1), 10);
 			if (this.battle.id.includes('digimon')) this.mod = 'digimon';
+			if (this.battle.id.includes('eternity')) {
+				this.mod = 'eternity';
+				this.gen = 1
+			}
 		}
 		if (!numericId) {
 			numericId = Math.floor(Math.random() * 1000000);
@@ -580,6 +584,7 @@ export class BattleScene implements BattleSceneStub {
 		if (Dex.prefs('nopastgens')) gen = 6;
 		if (Dex.prefs('bwgfx') && gen > 5) gen = 5;
 		this.gen = gen;
+		if (this.mod === 'eternity') gen = 1
 		this.activeCount = this.battle.nearSide?.active.length || 1;
 
 		const rated = this.battle.rated;
@@ -1186,13 +1191,33 @@ export class BattleScene implements BattleSceneStub {
 				x,
 				y,
 				z: side.behind(-20),
-				xscale: 1,
-				yscale: 0,
-				opacity: 0.1,
+												  xscale: 1,
+												  yscale: 0,
+												  opacity: 0.1,
 			}, this);
 			this.$spritesFront[spriteIndex].append(safeguard.$el);
 			this.sideConditions[siden][id] = [safeguard];
 			safeguard.anim({
+				opacity: 0.7,
+				time: instant ? 0 : 400,
+			}).anim({
+				opacity: 0.3,
+				time: instant ? 0 : 300,
+			});
+			break;
+		case 'warding':
+			const warding = new Sprite(BattleEffects.warding, {
+				display: 'block',
+				x,
+				y,
+				z: side.behind(-24),
+												  xscale: 1,
+												  yscale: 0,
+												  opacity: 0.1,
+			}, this);
+			this.$spritesFront[spriteIndex].append(warding.$el);
+			this.sideConditions[siden][id] = [warding];
+			warding.anim({
 				opacity: 0.7,
 				time: instant ? 0 : 400,
 			}).anim({
@@ -1244,37 +1269,37 @@ export class BattleScene implements BattleSceneStub {
 			const rock1 = new Sprite(BattleEffects.rock1, {
 				display: 'block',
 				x: x + side.leftof(-40),
-				y: y - 10,
-				z: side.z,
-				opacity: 0.5,
-				scale: 0.2,
+											 y: y - 10,
+											 z: side.z,
+											 opacity: 0.5,
+											 scale: 0.2,
 			}, this);
 
 			const rock2 = new Sprite(BattleEffects.rock2, {
 				display: 'block',
 				x: x + side.leftof(-20),
-				y: y - 40,
-				z: side.z,
-				opacity: 0.5,
-				scale: 0.2,
+											 y: y - 40,
+											 z: side.z,
+											 opacity: 0.5,
+											 scale: 0.2,
 			}, this);
 
 			const rock3 = new Sprite(BattleEffects.rock1, {
 				display: 'block',
 				x: x + side.leftof(30),
-				y: y - 20,
-				z: side.z,
-				opacity: 0.5,
-				scale: 0.2,
+											 y: y - 20,
+											 z: side.z,
+											 opacity: 0.5,
+											 scale: 0.2,
 			}, this);
 
 			const rock4 = new Sprite(BattleEffects.rock2, {
 				display: 'block',
 				x: x + side.leftof(10),
-				y: y - 30,
-				z: side.z,
-				opacity: 0.5,
-				scale: 0.2,
+											 y: y - 30,
+											 z: side.z,
+											 opacity: 0.5,
+											 scale: 0.2,
 			}, this);
 
 			this.$spritesFront[spriteIndex].append(rock1.$el);
@@ -1282,6 +1307,49 @@ export class BattleScene implements BattleSceneStub {
 			this.$spritesFront[spriteIndex].append(rock3.$el);
 			this.$spritesFront[spriteIndex].append(rock4.$el);
 			this.sideConditions[siden][id] = [rock1, rock2, rock3, rock4];
+			break;
+		case 'purescales':
+			const shine1 = new Sprite(BattleEffects.shine, {
+				display: 'block',
+				x: x + side.leftof(-40),
+											 y: y - 10,
+											 z: side.z,
+											 opacity: 0.5,
+											 scale: 0.2,
+			}, this);
+
+			const shine2 = new Sprite(BattleEffects.shine, {
+				display: 'block',
+				x: x + side.leftof(-20),
+											 y: y - 40,
+											 z: side.z,
+											 opacity: 0.5,
+											 scale: 0.2,
+			}, this);
+
+			const shine3 = new Sprite(BattleEffects.shine, {
+				display: 'block',
+				x: x + side.leftof(30),
+											 y: y - 20,
+											 z: side.z,
+											 opacity: 0.5,
+											 scale: 0.2,
+			}, this);
+
+			const shine4 = new Sprite(BattleEffects.shine, {
+				display: 'block',
+				x: x + side.leftof(10),
+											 y: y - 30,
+											 z: side.z,
+											 opacity: 0.5,
+											 scale: 0.2,
+			}, this);
+
+			this.$spritesFront[spriteIndex].append(shine1.$el);
+			this.$spritesFront[spriteIndex].append(shine2.$el);
+			this.$spritesFront[spriteIndex].append(shine3.$el);
+			this.$spritesFront[spriteIndex].append(shine4.$el);
+			this.sideConditions[siden][id] = [shine1, shine2, shine3, shine4];
 			break;
 		case 'gmaxsteelsurge':
 			const surge1 = new Sprite(BattleEffects.greenmetal1, {
@@ -1853,6 +1921,7 @@ export class PokemonSprite extends Sprite {
 		protosynthesisspa: ['Protosynthesis: SpA', 'good'],
 		protosynthesisspd: ['Protosynthesis: SpD', 'good'],
 		protosynthesisspe: ['Protosynthesis: Spe', 'good'],
+		powercore: ['Power Core', 'good'],
 		quarkdriveatk: ['Quark Drive: Atk', 'good'],
 		quarkdrivedef: ['Quark Drive: Def', 'good'],
 		quarkdrivespa: ['Quark Drive: SpA', 'good'],
@@ -2836,6 +2905,12 @@ export class PokemonSprite extends Sprite {
 			status += '<span class="par">PAR</span> ';
 		} else if (pokemon.status === 'frz') {
 			status += '<span class="frz">FRZ</span> ';
+		} else if (pokemon.status === 'wnd') {
+			status += '<span class="wnd">WND</span> ';
+		} else if (pokemon.status === 'trr') {
+			status += '<span class="trr">TRR</span> ';
+		} else if (pokemon.status === 'exh') {
+			status += '<span class="exh">EXH</span> ';
 		}
 		if (pokemon.terastallized) {
 			status += `<img src="${Dex.resourcePrefix}sprites/types/${encodeURIComponent(pokemon.terastallized)}.png" alt="${pokemon.terastallized}" class="pixelated" /> `;
@@ -3188,6 +3263,10 @@ const BattleEffects: { [k: string]: SpriteData } = {
 	},
 	safeguard: {
 		rawHTML: '<div class="sidecondition-safeguard" style="display:none;position:absolute" />',
+		w: 100, h: 50,
+	},
+	warding: {
+		rawHTML: '<div class="sidecondition-warding" style="display:none;position:absolute" />',
 		w: 100, h: 50,
 	},
 	lightscreen: {

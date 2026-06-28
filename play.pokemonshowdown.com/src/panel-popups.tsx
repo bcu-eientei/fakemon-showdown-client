@@ -634,6 +634,7 @@ class OptionsPanel extends PSRoomPanel {
 		case 'noselfhighlight':
 		case 'leavePopupRoom':
 		case 'inchatpm':
+		case 'bwtypes':
 			PS.prefs.set(setting, value);
 			break;
 		}
@@ -709,12 +710,17 @@ class OptionsPanel extends PSRoomPanel {
 				<label class="checkbox"><input
 					name="bwgfx" checked={PS.prefs.bwgfx || false} type="checkbox" onChange={this.handleOnChange}
 				/>  Use 2D sprites instead of 3D models</label>
-			</p>
-			<p>
-				<label class="checkbox"><input
+				</p>
+				<p>
+					<label class="checkbox"><input
 					name="nopastgens" checked={PS.prefs.nopastgens || false} type="checkbox" onChange={this.handleOnChange}
-				/> Use modern sprites for past generations</label>
-			</p>
+					/> Use modern sprites for past generations</label>
+				</p>
+				<p>
+					<label class="checkbox"><input
+					name="bwtypes" checked={PS.prefs.bwtypes || false} type="checkbox" onChange={this.handleOnChange}
+					/> Use BW type icons instead of FRLG type icons</label>
+				</p>
 			<hr />
 			<h3>Chat</h3>
 			<p>

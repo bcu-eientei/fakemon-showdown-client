@@ -1567,6 +1567,10 @@ export class Battle {
 					}
 				}
 			}
+
+			if (pokemon.status === 'exh' && !fromeffect) {
+				pokemon.rememberMove(moveName, 1);
+			}
 			let pp: PPState = callerMoveForPressure ? 0 : 1; // 1 pp was already deducted from using the move itself
 			if ((this.abilityActive('Pressure') || this.gen === 3) && move.id !== 'stickyweb') {
 				const foeTargets = [];
@@ -3183,6 +3187,10 @@ export class Battle {
 				if (this.gen > 6) maxTimeLeft = 8;
 			}
 			if (kwArgs.persistent) minTimeLeft += 2;
+			if (kwArgs.sundial) {
+				minTimeLeft *= 2;
+				maxTimeLeft *= 2
+			}
 			this.addPseudoWeather(effect.name, minTimeLeft, maxTimeLeft);
 
 			switch (effect.id) {
@@ -3329,7 +3337,7 @@ export class Battle {
 		// status parse
 		if (!status) {
 			output.status = '';
-		} else if (status === 'par' || status === 'brn' || status === 'slp' || status === 'frz' || status === 'tox') {
+		} else if (status === 'par' || status === 'brn' || status === 'slp' || status === 'frz' || status === 'tox' || status === 'trr' || status === 'exh' || status === 'wnd') {
 			output.status = status;
 		} else if (status === 'psn' && output.status !== 'tox') {
 			output.status = status;
@@ -3501,6 +3509,9 @@ export class Battle {
 			}
 			if (this.tier.includes(`Let's Go`)) {
 				this.dex = Dex.mod('gen7letsgo' as ID);
+			}
+			if (this.tier.includes(`Eternity`)) {
+				this.dex = Dex.mod('gen9eternity' as ID);
 			}
 			if (this.tier.includes('Super Staff Bros')) {
 				this.dex = Dex.mod('gen9ssb' as ID);

@@ -460,6 +460,7 @@
 			'change input[name=noanim]': 'setNoanim',
 			'change input[name=nogif]': 'setNogif',
 			'change input[name=bwgfx]': 'setBwgfx',
+			'change input[name=bwtypes]': 'setBwtypes',
 			'change input[name=nopastgens]': 'setNopastgens',
 			'change select[name=tournaments]': 'setTournaments',
 			'change select[name=language]': 'setLanguage',
@@ -522,6 +523,7 @@
 			}
 			buf += '<p><label class="checkbox"><input type="checkbox" name="bwgfx"' + (Dex.prefs('bwgfx') ? ' checked' : '') + ' /> Use 2D sprites instead of 3D models</label></p>';
 			buf += '<p><label class="checkbox"><input type="checkbox" name="nopastgens"' + (Dex.prefs('nopastgens') ? ' checked' : '') + ' /> Use modern sprites for past generations</label></p>';
+			buf += '<p><label class="checkbox"><input type="checkbox" name="bwtypes"' + (Dex.prefs('bwtypes') ? ' checked' : '') + ' /> Use BW type icons instead of FRLG type icons</label></p>';
 
 			buf += '<hr />';
 			buf += '<p><strong>Chat</strong></p>';
@@ -619,6 +621,10 @@
 			var bwgfx = !!e.currentTarget.checked;
 			Storage.prefs('bwgfx', bwgfx);
 			Dex.loadSpriteData(bwgfx || Dex.prefs('noanim') ? 'bw' : 'xy');
+		},
+		setBwtypes: function (e) {
+			var bwtypes = !!e.currentTarget.checked;
+			Storage.prefs('bwtypes', bwtypes);
 		},
 		setNopastgens: function (e) {
 			var nopastgens = !!e.currentTarget.checked;

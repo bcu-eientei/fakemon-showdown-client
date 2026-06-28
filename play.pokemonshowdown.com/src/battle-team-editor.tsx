@@ -65,6 +65,7 @@ export class TeamEditorState extends PSModel {
 	} | null = null;
 	isLetsGo = false;
 	isNatDex = false;
+	isEternity = false;
 	isBDSP = false;
 	formeLegality: 'normal' | 'hackmons' | 'custom' = 'normal';
 	abilityLegality: 'normal' | 'hackmons' = 'normal';
@@ -97,6 +98,9 @@ export class TeamEditorState extends PSModel {
 		format = toID(format).slice(4);
 		this.isLetsGo = formatid.includes('letsgo');
 		this.isNatDex = formatid.includes('nationaldex') || formatid.includes('natdex');
+		this.isEternity = formatid.includes('eternity');
+		console.log(formatid)
+		console.log(formatid.includes('eternity'))
 		this.isBDSP = formatid.includes('bdsp');
 		if (formatid.includes('almostanyability') || formatid.includes('aaa')) {
 			this.abilityLegality = 'hackmons';
@@ -1696,7 +1700,7 @@ class TeamTextbox extends preact.Component<{
 			<span class="detailcell">
 				<label>Shiny</label>{set.shiny ? 'Yes' : '\u2014'}
 			</span>
-			{editor.gen === 9 ? (
+			{(editor.gen === 9 && !(editor.isEternity)) ? (
 				<span class="detailcell">
 					<label>Tera</label><PSIcon type={set.teraType || species.requiredTeraType || species.types[0]} />
 				</span>
@@ -3131,7 +3135,7 @@ class DetailsForm extends preact.Component<{
 							class="textbox inputform numform default-placeholder" style="width: 50px"
 							onInput={this.changeHappiness} onChange={this.changeHappiness}
 						/></label></p>
-					) : (editor.gen < 8 || editor.isNatDex) && (
+					) : (editor.gen < 8 || (editor.isNatDex || editor.isEternity)) && (
 						<p><label class="label">Happiness: <input
 							name="happiness" value={set.happiness ?? ''} placeholder="255"
 							type="number" inputMode="numeric" min="0" max="255" step="1"
@@ -3160,7 +3164,7 @@ class DetailsForm extends preact.Component<{
 						)}
 					</p>
 				)}
-				{((!editor.isLetsGo && editor.gen === 7) || editor.isNatDex || species.baseSpecies === 'Unown') && <p>
+				{((!editor.isLetsGo && editor.gen === 7) || (editor.isNatDex || editor.isEternity) || species.baseSpecies === 'Unown') && <p>
 					<label class="label">Hidden Power Type: <select name="hptype" class="button" onChange={this.changeHPType}>
 						{Dex.types.all().map(type => (
 							type.HPivs && <option value={type.name} selected={editor.getHPType(set) === type.name}>
@@ -3169,7 +3173,7 @@ class DetailsForm extends preact.Component<{
 						))}
 					</select></label>
 				</p>}
-				{editor.gen === 9 && <p>
+				{(!editor.isEternity && editor.gen === 9) && <p>
 					<label class="label" title="Tera Type">
 						Tera Type: {}
 						{species.requiredTeraType && editor.formeLegality === 'normal' ? (

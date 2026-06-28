@@ -33,6 +33,9 @@
 				if (this.curTeam.format.includes('legends')) {
 					this.curTeam.dex = Dex.mod('gen9legendsou');
 				}
+				if (this.curTeam.format.includes('eternity')) {
+					this.curTeam.dex = Dex.mod('gen9eternity');
+				}
 				Storage.activeSetList = this.curSetList;
 			}
 		},
@@ -761,6 +764,9 @@
 			if (this.curTeam.format.includes('legends')) {
 				this.curTeam.dex = Dex.mod('gen9legendsou');
 			}
+			if (this.curTeam.format.includes('eternity')) {
+				this.curTeam.dex = Dex.mod('gen9eternity');
+			}
 			Storage.activeSetList = this.curSetList = Storage.unpackTeam(this.curTeam.team);
 			this.curTeamIndex = i;
 			this.update();
@@ -1289,6 +1295,7 @@
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex');
+			var isEternity = this.curTeam.format.includes('eternity');
 			var buf = '<li value="' + i + '">';
 			if (!set.species) {
 				if (this.deletedSet) {
@@ -1328,12 +1335,12 @@
 				buf += '<span class="detailcell"><label>Gender</label>' + GenderChart[set.gender || species.gender || 'N'] + '</span>';
 				if (isLetsGo) {
 					buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 70) + '</span>';
-				} else if (this.curTeam.gen < 8 || isNatDex) {
+				} else if (this.curTeam.gen < 8 || isNatDex || isEternity) {
 					buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
 				}
 				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
 				if (!isLetsGo && this.curTeam.gen < 9) {
-					if (this.curTeam.gen === 8 && !isNatDex) {
+					if (this.curTeam.gen === 8 && !isNatDex || isEternity) {
 						if (isBDSP && species.baseSpecies === "Unown") {
 							buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
 						}
@@ -1350,7 +1357,7 @@
 						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
 					}
 				}
-				if (this.curTeam.gen === 9) {
+				if (this.curTeam.gen === 9 && !isEternity) {
 					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.requiredTeraType || species.types[0]) + '</span>';
 				}
 			}
@@ -1616,6 +1623,9 @@
 			}
 			if (this.curTeam.format.includes('legends')) {
 				this.curTeam.dex = Dex.mod('gen9legendsou');
+			}
+			if (this.curTeam.format.includes('eternity')) {
+				this.curTeam.dex = Dex.mod('gen9eternity');
 			}
 			this.save();
 			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
@@ -2846,6 +2856,7 @@
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex');
 			var isHackmons = this.curTeam.format.includes('hackmons') || this.curTeam.format.endsWith('bh');
+			var isEternity = this.curTeam.format.includes('eternity');
 			var species = this.curTeam.dex.species.get(set.species);
 			if (!set) return;
 			buf += '<div class="resultheader"><h3>Details</h3></div>';
@@ -2872,7 +2883,7 @@
 				if (isLetsGo) {
 					buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" name="happiness" value="70" class="textbox inputform numform" /></div></div>';
 				} else {
-					if (this.curTeam.gen < 8 || isNatDex) buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" min="0" max="255" step="1" name="happiness" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '" class="textbox inputform numform" /></div></div>';
+					if (this.curTeam.gen < 8 || isNatDex || isEternity) buf += '<div class="formrow"><label class="formlabel">Happiness:</label><div><input type="number" min="0" max="255" step="1" name="happiness" value="' + (typeof set.happiness === 'number' ? set.happiness : 255) + '" class="textbox inputform numform" /></div></div>';
 				}
 
 				buf += '<div class="formrow"><label class="formlabel">Shiny:</label><div>';
@@ -2919,7 +2930,7 @@
 				buf += '</select></div></div>';
 			}
 
-			if (this.curTeam.gen === 9) {
+			if (this.curTeam.gen === 9 && !isEternity) {
 				buf += '<div class="formrow"><label class="formlabel" title="Tera Type">Tera Type:</label><div>';
 				buf += '<select name="teratype" class="button">';
 				var types = Dex.types.all();
@@ -2946,6 +2957,7 @@
 			var isLetsGo = this.curTeam.format.includes('letsgo');
 			var isBDSP = this.curTeam.format.includes('bdsp');
 			var isNatDex = this.curTeam.format.includes('nationaldex') || this.curTeam.format.includes('natdex');
+			var isEternity = this.curTeam.format.includes('eternity');
 
 			// level
 			var level = parseInt(this.$chart.find('input[name=level]').val(), 10);
@@ -3025,7 +3037,7 @@
 				if (isLetsGo) {
 					buf += '<span class="detailcell"><label>Happiness</label>70</span>';
 				} else {
-					if (this.curTeam.gen < 8 || isNatDex) buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
+					if (this.curTeam.gen < 8 || isNatDex || isEternity) buf += '<span class="detailcell"><label>Happiness</label>' + (typeof set.happiness === 'number' ? set.happiness : 255) + '</span>';
 				}
 				buf += '<span class="detailcell"><label>Shiny</label>' + (set.shiny ? 'Yes' : 'No') + '</span>';
 				if (!isLetsGo && (this.curTeam.gen < 8 || isNatDex)) buf += '<span class="detailcell"><label>HP Type</label>' + (set.hpType || 'Dark') + '</span>';
@@ -3037,7 +3049,7 @@
 						buf += '<span class="detailcell"><label>Gmax</label>' + (set.gigantamax || species.forme === 'Gmax' ? 'Yes' : 'No') + '</span>';
 					}
 				}
-				if (this.curTeam.gen === 9) {
+				if (this.curTeam.gen === 9 && !isEternity) {
 					buf += '<span class="detailcell"><label>Tera Type</label>' + (set.teraType || species.requiredTeraType || species.types[0]) + '</span>';
 				}
 			}
@@ -3282,6 +3294,7 @@
 				if (baseFormat.substr(0, 6) === 'natdex') baseFormat = baseFormat.substr(6);
 				if (baseFormat.substr(0, 11) === 'nationaldex') baseFormat = baseFormat.substr(11);
 				if (baseFormat.substr(-5) === 'draft') baseFormat = baseFormat.substr(0, baseFormat.length - 5);
+				if (baseFormat.substr(8) === 'eternity') baseFormat = baseFormat.substr(8);
 				if (!baseFormat) baseFormat = 'ou';
 				if (this.curTeam && this.curTeam.format) {
 					if (baseFormat === 'battlespotsingles' || baseFormat === 'battlespotdoubles' || baseFormat.substr(0, 3) === 'vgc' ||
@@ -3317,6 +3330,7 @@
 				if (baseFormat.substr(0, 6) === 'natdex') baseFormat = baseFormat.substr(6);
 				if (baseFormat.substr(0, 11) === 'nationaldex') baseFormat = baseFormat.substr(11);
 				if (baseFormat.substr(-5) === 'draft') baseFormat = baseFormat.substr(0, baseFormat.length - 5);
+				if (baseFormat.substr(8) === 'eternity') baseFormat = baseFormat.substr(8);
 				if (!baseFormat) baseFormat = 'ou';
 				if (this.curTeam && this.curTeam.format) {
 					if (baseFormat === 'battlespotsingles' || baseFormat === 'battlespotdoubles' || baseFormat.substr(0, 3) === 'vgc' ||

@@ -20,6 +20,28 @@
 	border-color: hsl(60,14%,41%);
 }
 
+.movemenu button.type-Cosmic {
+	/* bg: 97 to 90, border: 70 */
+	background: hsl(270,85%,93%);
+	background: linear-gradient(to bottom,  hsl(270,85%,97%),  hsl(270,85%,84%));
+	border-color: hsl(270,85%,70%);
+}
+.movemenu button.type-Cosmic small {
+	color: hsl(270,85%,41%);
+}
+.movemenu button.type-Cosmic:hover {
+	/* bg: 95 to 83, border: 41 */
+	background: hsl(270,85%,87%);
+	background: linear-gradient(to bottom,  hsl(270,85%,94%),  hsl(270,85%,77%));
+	border-color: hsl(270,85%,41%);
+}
+.movemenu button.type-Cosmic:active, .movemenu button.type-Cosmic.pressed {
+	/* bg: 83 to 88, border: 41 */
+	background: hsl(270,85%,77%);
+	background: linear-gradient(to bottom,  hsl(270,85%,77%),  hsl(270,85%,83%));
+	border-color: hsl(270,85%,41%);
+}
+
 .movemenu button.type-Fighting {
 	/* bg: 97 to 90, border: 70 */
 	background: hsl(3,40%,93%);

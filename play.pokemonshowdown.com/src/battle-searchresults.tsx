@@ -53,6 +53,7 @@ export class PSSearchResults extends preact.Component<{
 			<button class={`sortcol powersortcol${sortCol === 'power' ? ' cur' : ''}`} data-sort="power">Pow</button>
 			<button class={`sortcol accuracysortcol${sortCol === 'accuracy' ? ' cur' : ''}`} data-sort="accuracy">Acc</button>
 			<button class={`sortcol ppsortcol${sortCol === 'pp' ? ' cur' : ''}`} data-sort="pp">PP</button>
+			<button class={`sortcol flagsortcol${sortCol === 'flag' ? ' cur' : ''}`} data-sort="flag">Flags</button>
 		</div></li>;
 	}
 
@@ -278,16 +279,26 @@ export class PSSearchResults extends preact.Component<{
 		const name = id.charAt(0).toUpperCase() + id.slice(1);
 
 		return <li class="result"><a href={`${this.URL_ROOT}types/${id}`} data-target="push" data-entry={`type|${name}`}>
-			<span class="col namecol">{this.renderName(name, matchStart, matchEnd)}</span>
+		<span class="col namecol">{this.renderName(name, matchStart, matchEnd)}</span>
 
-			<span class="col typecol">
-				<img
-					src={`${Dex.resourcePrefix}sprites/types/${encodeURIComponent(name)}.png`}
-					alt={name} height="14" width="32" class="pixelated"
-				/>
-			</span>
+		<span class="col typecol">
+		<img
+		src={`${Dex.resourcePrefix}sprites/types/${encodeURIComponent(name)}.png`}
+		alt={name} height="14" width="32" class="pixelated"
+		/>
+		</span>
 
-			{errorMessage}
+		{errorMessage}
+		</a></li>;
+	}
+
+	renderFlagRow(id: ID, matchStart: number, matchEnd: number, errorMessage?: preact.ComponentChildren) {
+		const name = id.charAt(0).toUpperCase() + id.slice(1);
+
+		return <li class="result"><a data-target="push" data-entry={`flag|${name}`}>
+		<span class="col namecol">{this.renderName(name, matchStart, matchEnd)}</span>
+
+		{errorMessage}
 		</a></li>;
 	}
 
@@ -404,6 +415,8 @@ export class PSSearchResults extends preact.Component<{
 			return this.renderAbilityRow(id, matchStart, matchEnd, errorMessage);
 		case 'type':
 			return this.renderTypeRow(id, matchStart, matchEnd, errorMessage);
+		case 'flag':
+			return this.renderFlagRow(id, matchStart, matchEnd, errorMessage);
 		case 'egggroup':
 			return this.renderEggGroupRow(id, matchStart, matchEnd, errorMessage);
 		case 'tier':

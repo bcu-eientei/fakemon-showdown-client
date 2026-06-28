@@ -8,16 +8,19 @@ const child_process = require("child_process");
 const rootDir = path.resolve(__dirname, '..');
 process.chdir(rootDir);
 
+console.log(rootDir)
+
 if (!fs.existsSync('caches/pokemon-showdown')) {
-	child_process.execSync('git clone https://github.com/smogon/pokemon-showdown.git', {
+	child_process.execSync('git clone ../../pokemon-showdown', {
 		cwd: 'caches',
 	});
 }
 
-process.stdout.write("Syncing data from Git repository... ");
-child_process.execSync('git pull', { cwd: 'caches/pokemon-showdown' });
-child_process.execSync('npm run build', { cwd: 'caches/pokemon-showdown' });
-console.log("DONE");
+if (!fs.existsSync('play.pokemonshowdown.com/sprites')) {
+	child_process.execSync('git clone ../../sprites', {
+		cwd: 'play.pokemonshowdown.com',
+	});
+}
 
 const Dex = require('../caches/pokemon-showdown/dist/sim/dex').Dex;
 const CompoundWordNames = require('../caches/pokemon-showdown/dist/data/aliases').CompoundWordNames;
@@ -267,6 +270,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		7.1,
 		5.1,
 		3.1,
+		9.1293213
 	];
 
 	// process.stdout.write("\n  ");
@@ -289,6 +293,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		const genNum = Math.floor(isDoubles ? -genIdent : genIdent);
 		const isBW1 = genIdent === 5.1;
 		const isRS = genIdent === 3.1;
+		const isEternity = genIdent === 9.1293213;
 		const gen = (() => {
 			let genStr = 'gen' + genNum;
 			if (isSSDLC1) genStr += 'dlc1';
@@ -301,9 +306,10 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			if (isSSB) genStr += 'ssb';
 			if (isBW1) genStr += 'bw1';
 			if (isRS) genStr += 'rs';
+			if (isEternity) genStr += 'eternity';
 			return genStr;
 		})();
-		// process.stdout.write("" + gen + (isDoubles ? " doubles" : "") + "... ");
+		 process.stdout.write("" + gen + (isDoubles ? " doubles" : "") + "... ");
 		const pokemon = Object.keys(Dex.data.Pokedex);
 		pokemon.sort();
 		const tierTable = {};
@@ -441,7 +447,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 					'aaa', 'bh', 'doubles', // natdex abbreviations
 					'tiershift', 'linked',
 				])) {
-					const format = Dex.formats.get(`${gen}${isNatDex ? 'nationaldex' : ''}${meta}`);
+					const format = Dex.formats.get(`${gen}${isEternity ? 'eternity' : isNatDex ? 'nationaldex' : ''}${meta}`);
 					if (!format.exists) continue;
 					const ruleTable = Dex.formats.getRuleTable(format);
 					let banned = ruleTable.isBannedSpecies(species);
@@ -572,6 +578,13 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable['gen9legendsou'].formatSlices = formatSlices;
 			BattleTeambuilderTable['gen9legendsou'].items = items;
 			BattleTeambuilderTable['gen9legendsou'].learnsets = {};
+		} else if (isEternity) {
+			BattleTeambuilderTable['gen9eternity'] = {};
+			BattleTeambuilderTable['gen9eternity'].learnsets = {};
+			BattleTeambuilderTable['gen9eternity'].tiers = tiers;
+			BattleTeambuilderTable['gen9eternity'].overrideTier = overrideTier;
+			BattleTeambuilderTable['gen9eternity'].formatSlices = formatSlices;
+			BattleTeambuilderTable['gen9eternity'].items = items;
 		} else if (gen === 'gen9') {
 			BattleTeambuilderTable.tiers = tiers;
 			BattleTeambuilderTable.items = items;
@@ -661,6 +674,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		itemList.sort();
 
 		const greatItems = [['header', "Popular items"]];
+		const zmoves = [['header', "Z-Moves"]];
+		const solidItems = [['header', "Generally useful items"]];
 		const goodItems = [['header', "Items"]];
 		const specificItems = [['header', "Pok\u00e9mon-specific items"]];
 		const poorItems = [['header', "Usually useless items"]];
@@ -702,9 +717,11 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			case 'choicescarf':
 			case 'assaultvest':
 			case 'focussash':
+			case 'blacksludge':
 			case 'powerherb':
 			case 'rockyhelmet':
-				if (!isMetBattle) greatItems.push(id);
+				if (isEternity && ['powerherb'].includes(id)) solidItems.push(id)
+				else if (!isMetBattle) greatItems.push(id);
 				else goodItems.push(id);
 				break;
 			// just singles
@@ -714,6 +731,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			case 'expertbelt':
 			case 'salacberry':
 				if (isDoubles || isMetBattle) goodItems.push(id);
+				else if (isEternity && id != 'heavydutyboots') solidItems.push(id)
 				else greatItems.push(id);
 				break;
 			// just doubles
@@ -721,6 +739,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			case 'ejectbutton':
 			case 'ejectpack':
 				if (isDoubles) greatItems.push(id);
+				else if (isEternity && id != 'safetygoggles') solidItems.push(id)
+				else if (isEternity && id == 'safetygoggles') badItems.push(id)
 				else goodItems.push(id);
 				break;
 			// doubles + metronome
@@ -728,25 +748,31 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			case 'clearamulet':
 			case 'weaknesspolicy':
 				if (isDoubles || isMetBattle) greatItems.push(id);
+				else if (isEternity && id != 'clearamulet') solidItems.push(id)
+				else if (isEternity && id == 'clearamulet') badItems.push(id)
 				else goodItems.push(id);
 				break;
 			// metronome only
 			case 'mirrorherb':
 				if (isMetBattle) greatItems.push(id);
+				else if (isEternity) solidItems.push(id)
 				else goodItems.push(id);
 				break;
 			// generation specific
 			case 'mentalherb':
 				if (isMetBattle) goodItems.push(id);
+				else if (isEternity) solidItems.push(id)
 				else if (genNum > 4) greatItems.push(id);
 				else poorItems.push(id);
 				break;
 			case 'lumberry':
-				if (genNum === 2 || genNum > 6) goodItems.push(id);
+				if (isEternity) solidItems.push(id)
+				else if (genNum === 2 || genNum > 6) goodItems.push(id);
 				else greatItems.push(id);
 				break;
 			case 'sitrusberry':
-				if (genNum > 3 && (genNum < 7 || isDoubles)) greatItems.push(id);
+				if (isEternity) solidItems.push(id)
+				else if (genNum > 3 && (genNum < 7 || isDoubles)) greatItems.push(id);
 				else if (genNum > 6) goodItems.push(id);
 				else poorItems.push(id);
 				break;
@@ -852,6 +878,13 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				badItems.push(id);
 				break;
 			// outclassed items
+
+			// Deal with these separately
+			case 'bigroot':
+			case 'shellbell':
+				if (isEternity) solidItems.push(id);
+				else poorItems.push(id);
+				break;
 			case 'aspearberry':
 			case 'bindingband':
 			case 'cheriberry':
@@ -873,7 +906,6 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			case 'rawstberry':
 			case 'ringtarget':
 			case 'rowapberry':
-			case 'bigroot':
 			case 'focusband':
 			// gen 2
 			case 'psncureberry':
@@ -884,6 +916,41 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			case 'berry':
 				poorItems.push(id);
 				break;
+
+			// Why is this not good?
+			case 'lightclay':
+				if (isEternity) solidItems.push(id);
+				else goodItems.push(id)
+				break;
+
+			// Solid unit only categorization
+			case 'abilityshield':
+			case 'blackbelt':
+			case 'blackglasses':
+			case 'charcoal':
+			case 'electricseed':
+			case 'fairyfeather':
+			case 'grassyseed':
+			case 'hardstone':
+			case 'magnet':
+			case 'metalcoat':
+			case 'miracleseed':
+			case 'mysticwater':
+			case 'nevermeltice':
+			case 'oddincense':
+			case 'psychicseed':
+			case 'punchingglove':
+			case 'redcard':
+			case 'rockincense':
+			case 'silkscarf':
+			case 'silverpowder':
+			case 'softsand':
+			case 'spelltag':
+			case 'twistedspoon':
+			case 'waveincense':
+				if (isEternity) solidItems.push(id);
+				else goodItems.push(id)
+				break;
 			default:
 				if (
 					item.name.endsWith(" Ball") || item.name.endsWith(" Fossil") || item.name.startsWith("Fossilized ") ||
@@ -892,6 +959,10 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 					badItems.push(id);
 				} else if (item.name.startsWith("TR")) {
 					badItems.push(id);
+				} else if (item.name.endsWith(" Rock")) {
+					solidItems.push(id);
+				} else if (item.name.endsWith(" Z")) {
+					zmoves.push(id);
 				} else if (item.name.endsWith(" Gem") && item.name !== "Normal Gem") {
 					if (genNum >= 6) {
 						unreleasedItems.push(id);
@@ -914,6 +985,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			}
 		}
 		items.push(...greatItems);
+		if (isEternity) items.push(...zmoves);
+		if (isEternity) items.push(...solidItems);
 		items.push(...goodItems);
 		items.push(...specificItems);
 		items.push(...poorItems);
@@ -1214,13 +1287,23 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			}
 		}
 	}
+	const EternityLearnsets = Dex.mod('gen9eternity').data.Learnsets;
+	for (const id in EternityLearnsets) {
+		const species = Dex.mod('gen9eternity').species.get(id);
+		if (species.isNonstandard && !['Unobtainable', 'CAP'].includes(species.isNonstandard)) continue;
+		const learnset = EternityLearnsets[id].learnset;
+		BattleTeambuilderTable['gen9eternity'].learnsets[id] = {};
+		for (const moveid in learnset) {
+			BattleTeambuilderTable['gen9eternity'].learnsets[id][moveid] = '9a';
+		}
+	}
 
 	// Client relevant data that should be overridden by past gens and mods
 	const overrideSpeciesKeys = [
 		'abilities', 'baseStats', 'cosmeticFormes', 'isNonstandard', 'requiredItems', 'types', 'unreleasedHidden',
 	];
 	const overrideMoveKeys = [
-		'accuracy', 'basePower', 'category', 'desc', 'flags', 'isNonstandard', 'pp', 'priority', 'shortDesc', 'target', 'type',
+		'accuracy', 'basePower', 'category', 'desc', 'flags', 'isNonstandard', 'pp', 'priority', 'shortDesc', 'target', 'type', 'zMove'
 	];
 	const overrideAbilityKeys = ['desc', 'flags', 'isNonstandard', 'rating', 'shortDesc'];
 	const overrideItemKeys = ['desc', 'fling', 'isNonstandard', 'naturalGift', 'shortDesc'];
@@ -1312,7 +1395,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	// Mods
 	//
 
-	for (const mod of ['gen3rs', 'gen5bw1', 'gen7letsgo', 'gen8bdsp', 'gen9ssb', 'gen9legendsou']) {
+	for (const mod of ['gen3rs', 'gen5bw1', 'gen7letsgo', 'gen8bdsp', 'gen9ssb', 'gen9legendsou', 'gen9eternity']) {
 		const modDex = Dex.mod(mod);
 		const modData = modDex.data;
 		const parentDex = Dex.forGen(modDex.gen);

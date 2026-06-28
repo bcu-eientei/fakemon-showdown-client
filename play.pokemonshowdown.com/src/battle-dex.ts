@@ -231,13 +231,23 @@ export const Dex = new class implements ModdedDex {
 
 	resourcePrefix = (() => {
 		let prefix = '';
+		let list = window.location.href
 		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
-		return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
+		if (list.includes("testclient.html")) {
+			list = list.split("testclient")[0]
+		}
+		return list;
+		//return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
 	})();
 
 	fxPrefix = (() => {
-		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
-		return `${protocol}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/fx/`;
+		let prefix = '';
+		let list = window.location.href
+		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
+		if (list.includes("testclient.html")) {
+			list = list.split("testclient")[0]
+		}
+		return list + '/fx/';
 	})();
 
 	loadedSpriteData = { xy: 1, bw: 0 };
@@ -282,6 +292,9 @@ export const Dex = new class implements ModdedDex {
 		}
 		if (dex.gen === 9 && formatid.includes('legends')) {
 			dex = Dex.mod('gen9legendsou' as ID);
+		}
+		if (dex.gen === 9 && formatid.includes('eternity')) {
+			dex = Dex.mod('gen9eternity' as ID);
 		}
 		return dex;
 	}
@@ -635,6 +648,10 @@ export const Dex = new class implements ModdedDex {
 		if (Dex.prefs('nopastgens')) graphicsGen = 6;
 		if (Dex.prefs('bwgfx') && graphicsGen >= 6) graphicsGen = 5;
 		spriteData.gen = Math.max(graphicsGen, Math.min(species.gen, 5));
+		if (options.mod === 'eternity') graphicsGen = 1;
+		if (options.mod === 'eternity') spriteData.gen = 1;
+		console.log(options.mod)
+		console.log(spriteData.gen)
 		const baseDir = ['', 'gen1', 'gen2', 'gen3', 'gen4', 'gen5', '', '', '', ''][spriteData.gen];
 
 		let miscData = null;
@@ -782,7 +799,7 @@ export const Dex = new class implements ModdedDex {
 		} else if (window.BattlePokedex?.[id]?.num) {
 			num = BattlePokedex[id].num;
 		}
-		if (num < 0) num = 0;
+		if (num < 0 && num > -7000) num = 0;
 		if (num > 1025) num = 0;
 
 		if (window.BattlePokemonIconIndexes?.[id]) {
@@ -830,6 +847,10 @@ export const Dex = new class implements ModdedDex {
 		let left = (num % 12) * 40;
 		let fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ?
 			`;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
+
+		if (num < -8000) {
+			return `background:transparent url(${Dex.resourcePrefix}sprites/gen1/${id}.png) no-repeat scroll 0 0${fainted}; background-position: center;`;
+		}
 		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v21) no-repeat scroll -${left}px -${top}px${fainted}`;
 	}
 
@@ -863,11 +884,12 @@ export const Dex = new class implements ModdedDex {
 			y: -3,
 		};
 		if (pokemon.shiny) spriteData.shiny = true;
+		if (dex.modid === 'gen9eternity') gen = 1;
 		if (dex.modid === 'gen7letsgo') gen = 8;
 		if (Dex.prefs('nopastgens')) gen = 9;
 		if (Dex.prefs('bwgfx') && gen > 5) gen = 5;
 		// TODO: refactor after we get home sprites for Z-A Megas and Eternal Floette
-		let homeExists = (!species.isNonstandard || !['CAP', 'Custom'].includes(species.isNonstandard) ||
+		let homeExists = (!species.isNonstandard || !['CAP', 'Custom', 'Eternity'].includes(species.isNonstandard) ||
 			species.id === "xerneasneutral") && ![
 			"floetteeternal", "pichuspikyeared", "pikachubelle", "pikachucosplay", "pikachulibre", "pikachuphd", "pikachupopstar", "pikachurockstar",
 		].includes(species.id) && !(species.isMega && species.gen === 9);
@@ -903,6 +925,7 @@ export const Dex = new class implements ModdedDex {
 		else if (gen <= 2 && species.gen <= 2) spriteData.spriteDir = 'sprites/gen2';
 		else if (gen <= 3 && species.gen <= 3) spriteData.spriteDir = 'sprites/gen3';
 		else if (gen <= 4 && species.gen <= 4) spriteData.spriteDir = 'sprites/gen4';
+		if (dex.modid === 'gen9eternity') spriteData.spriteDir = 'sprites/gen1';
 		spriteData.x = 10;
 		spriteData.y = 5;
 		return spriteData;
@@ -930,7 +953,9 @@ export const Dex = new class implements ModdedDex {
 		type = this.types.get(type).name;
 		if (!type) type = '???';
 		let sanitizedType = type.replace(/\?/g, '%3f');
-		return `<img src="${Dex.resourcePrefix}sprites/types/${sanitizedType}.png" alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
+		let existance = 'types'
+		if (Dex.prefs('bwtypes')) existance = 'old-types'
+		return `<img src="${Dex.resourcePrefix}sprites/${existance}/${sanitizedType}.png" alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
 	}
 
 	getCategoryIcon(category: string | null) {

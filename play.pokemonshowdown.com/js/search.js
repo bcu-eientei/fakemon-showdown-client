@@ -290,6 +290,7 @@
 		buf += '<button class="sortcol powersortcol' + (this.sortCol === 'power' ? ' cur' : '') + '" data-sort="power">Pow</button>';
 		buf += '<button class="sortcol accuracysortcol' + (this.sortCol === 'accuracy' ? ' cur' : '') + '" data-sort="accuracy">Acc</button>';
 		buf += '<button class="sortcol ppsortcol' + (this.sortCol === 'pp' ? ' cur' : '') + '" data-sort="pp">PP</button>';
+		buf += '<button class="sortcol flagsortcol$' + (this.sortCol === 'flag' ? ' cur' : '') + '" data-sort="flag">Flags</button>';
 		buf += '</div></li>';
 		return buf;
 	};

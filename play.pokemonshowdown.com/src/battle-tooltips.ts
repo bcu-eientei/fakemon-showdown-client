@@ -1073,7 +1073,7 @@ export class BattleTooltips {
 			clientPokemon?.effectiveAbility(serverPokemon) ?? (serverPokemon.ability || serverPokemon.baseAbility)
 		);
 
-		// check for burn, paralysis, guts, quick feet
+		// check for burn, paralysis, freeze, terror, guts, quick feet
 		if (pokemon.status) {
 			if (this.battle.gen > 2 && ability === 'guts') {
 				stats.atk = Math.floor(stats.atk * 1.5);
@@ -1084,6 +1084,15 @@ export class BattleTooltips {
 			// Paralysis is calculated later in newer generations, so we need to apply it early here
 			if (this.battle.gen <= 2 && pokemon.status === 'par') {
 				stats.spe = Math.floor(stats.spe * 0.25);
+			}
+
+			if (pokemon.status === 'frz') {
+				stats.def = Math.floor(stats.def * 3/4);
+			}
+
+			if (pokemon.status === 'trr') {
+				stats.spa = Math.floor(stats.spa * 0.8);
+				stats.spd = Math.floor(stats.spd * 0.8);
 			}
 		}
 
@@ -1212,6 +1221,13 @@ export class BattleTooltips {
 			if (clientPokemon.volatiles['slowstart']) {
 				stats.atk = Math.floor(stats.atk * 0.5);
 				speedModifiers.push(0.5);
+				if (this.battle.tier.includes('Eternity')) stats.spa = Math.floor(stats.spa * 0.5);
+			}
+			if (clientPokemon.volatiles['powercore']) {
+				stats.atk = Math.floor(stats.atk * 1.5);
+				stats.def = Math.floor(stats.def * 1.5);
+				stats.spa = Math.floor(stats.spa * 1.5);
+				stats.spd = Math.floor(stats.spd * 1.5);
 			}
 			if (ability === 'unburden' && clientPokemon.volatiles['itemremoved'] && !item) {
 				speedModifiers.push(2);
@@ -1712,6 +1728,10 @@ export class BattleTooltips {
 			(move.id === 'terablast' && pokemon.terastallized) ||
 			(move.id === 'terastarstorm' && pokemon.getSpeciesForme() === 'Terapagos-Stellar')) {
 			const stats = this.calculateModifiedStats(pokemon, serverPokemon, true);
+		if (stats.atk > stats.spa) category = 'Physical';
+			}
+		if (move.id.startsWith('hiddenpower') && this.battle.tier.includes('Eternity')) {
+			const stats = this.calculateModifiedStats(pokemon, serverPokemon, true);
 			if (stats.atk > stats.spa) category = 'Physical';
 		}
 
@@ -1786,6 +1806,7 @@ export class BattleTooltips {
 		value.abilityModify(0, 'No Guard');
 		if (!value.value) return value;
 
+
 		// OHKO moves don't use standard accuracy / evasion modifiers
 		if (move.ohko) {
 			if (this.battle.gen === 1) {
@@ -1835,8 +1856,14 @@ export class BattleTooltips {
 		}
 
 		if (value.tryItem('Wide Lens')) {
+
+			if (this.battle.tier.includes('Eternity')) {
 			accuracyModifiers.push(4505);
-			value.itemModify(1.1, "Wide Lens");
+				value.itemModify(1.1, "Wide Lens");
+			} else {
+				accuracyModifiers.push(4505);
+				value.itemModify(1.1, "Wide Lens");
+			}
 		}
 
 		// SSB
@@ -2206,6 +2233,11 @@ export class BattleTooltips {
 				} else if (allyAbility === 'Steely Spirit' && moveType === 'Steel') {
 					value.modify(1.5, 'Steely Spirit');
 				}
+				if (this.battle.tier.includes("Eternity")) {
+					if (allyAbility === 'Illuminate' && (moveType === 'Dark' || moveType === 'Ghost')) {
+						value.modify(0.75, 'Illuminate');
+					}
+				}
 			}
 			for (const foe of pokemon.side.foe.active) {
 				if (!foe || foe.fainted) continue;
@@ -2215,6 +2247,11 @@ export class BattleTooltips {
 					auraBoosted = 'Dark Aura';
 				} else if (foe.ability === 'Aura Break') {
 					auraBroken = true;
+				}
+				if (this.battle.tier.includes("Eternity")) {
+					if (foe.ability === 'Illuminate' && (moveType === 'Dark' || moveType === 'Ghost')) {
+						value.modify(0.75, 'Illuminate');
+					}
 				}
 			}
 			if (auraBoosted) {
